@@ -1,0 +1,19 @@
+{
+  "method": "torchaudio_mms_fa+duration_phone_split",
+  "frame_hz": 50.0,
+  "device": "cuda:1",
+  "summary": {
+    "train": {
+      "ok_fa": 2500,
+      "fallback": 0,
+      "skip": 0,
+      "error": 0
+    },
+    "test": {
+      "ok_fa": 2500,
+      "fallback": 0,
+      "skip": 0,
+      "error": 0
+    }
+  }
+}

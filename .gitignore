@@ -1,0 +1,31 @@
+# Feature files
+**/features/
+
+# numpy feature files
+*.npy
+
+# Model checkpoints
+*.pt
+*.pth
+*.ckpt
+
+# Logs
+logs/
+outputs/
+results/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Mac system files
+.DS_Store

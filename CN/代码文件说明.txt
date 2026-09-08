@@ -1,0 +1,112 @@
+LAPG/CN 代码文件说明
+====================
+说明：以下为中文 CAPT GNN 训练相关代码。运行入口是 run_seeds.sh → train_gop_graph.py。
+
+------------------------------------------------------------
+一、启动与入口
+------------------------------------------------------------
+
+[run_seeds.sh]
+  一键跑最优 5 个种子（180 / 265 / 70 / 226 / 12）。
+  用法：CUDA_DEVICE=0 ./run_seeds.sh
+  输出目录：exp/seed{N}/
+
+[train_gop_graph.py]
+  训练主程序（最重要）。
+  负责：读 labels / features / caches、组 DataLoader、建模型、
+  多任务损失（ASR / MDD / APA / SupCon）、验证、存 best_model.pt。
+  数据路径默认相对本目录：data/、features/、caches/、exp/。
+
+[README.md]
+  简要说明布局、5 个 seed、运行命令。
+
+------------------------------------------------------------
+二、模型主体
+------------------------------------------------------------
+
+[phoneme_gnn.py]
+  主模型定义（PhonemeGraphModel）。
+  含：SSL→Prosody FiLM→Qwen FiLM、图编码器 stem/MDD/APA 塔、
+  ASR/MDD/APA 输出头、与 Sync 模块的衔接。
+
+[typed_gnn_blocks.py]
+  图网络基本块：带边类型的 TransformerConv（EdgeTransformer）。
+  被 stem / MDD / APA 各塔复用（结构相同、权重不共享）。
+
+[phoneme_graph_edges.py]
+  中文音素图拓扑：Initial → Final → Tone → Global。
+  生成边列表与边类型；训练时用 build_phoneme_graph_edges()。
+
+------------------------------------------------------------
+三、特征融合与跨层交互
+------------------------------------------------------------
+
+[tri_ssl_cross_enhancer.py]
+  三路 SSL（HuBERT / Wav2Vec2 / WavLM）投影与自注意力增强，
+  供后续 FiLM / Sync 使用。
+
+[cross_layer_sync.py]
+  Cross-Layer Sync：节点表征 ↔ 帧表征的跨层注意力桥接
+  （默认在第 2、4 层同步）。
+
+[apa_segment_readout.py]
+  APA 用的帧级 cross-attention 读出（按声母/韵母等片段聚合）。
+
+[apa_heads.py]
+  APA 字级打分头（输出发音评分相关预测）。
+
+------------------------------------------------------------
+四、对齐、缓存与辅助损失
+------------------------------------------------------------
+
+[phoneme_ctc_align.py]
+  帧与声母/韵母片段的时长对齐（duration align），
+  给 Sync / APA 提供片段边界信息。
+
+[hubert_fa_cache.py]
+  加载 Forced Alignment 缓存（.npz）：每帧是否属于声母/韵母 mask。
+  对应目录：caches/fa_hubert_native/
+
+[hubert_side_cache.py]
+  加载韵律侧特征缓存：F0、Energy，并做归一化统计。
+  对应目录：caches/hubert_f0/、caches/hubert_energy/
+
+[phonological_contrast.py]
+  Stem 层的监督对比学习损失（SupCon），按参考音素 token 拉近/推远。
+
+------------------------------------------------------------
+五、数据与特征目录（非 .py，但训练依赖）
+------------------------------------------------------------
+
+[data/train/labels.jsonl] [data/test/labels.jsonl]
+  标注（字、参考/真实拼音、MDD、APA、时间边界等）。
+
+[features/]
+  预提取帧特征：hubert / wav2vec2 / wavlm / qwen（.npy）。
+
+[caches/]
+  FA mask、F0、Energy 缓存。
+
+[exp/]
+  训练输出（跑 run_seeds.sh 后生成）：日志、best_model.pt 等。
+
+------------------------------------------------------------
+六、依赖关系（简图）
+------------------------------------------------------------
+
+  run_seeds.sh
+      └─ train_gop_graph.py
+            ├─ phoneme_gnn.py
+            │     ├─ typed_gnn_blocks.py
+            │     ├─ phoneme_graph_edges.py
+            │     ├─ tri_ssl_cross_enhancer.py
+            │     ├─ cross_layer_sync.py
+            │     ├─ apa_heads.py
+            │     └─ apa_segment_readout.py
+            ├─ phoneme_graph_edges.py
+            ├─ hubert_fa_cache.py
+            ├─ hubert_side_cache.py
+            ├─ phoneme_ctc_align.py
+            └─ phonological_contrast.py
+
+以上 .py 均被训练路径引用，缺一不可。

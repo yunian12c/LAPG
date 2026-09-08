@@ -1,0 +1,144 @@
+LAPG/EN 代码文件说明
+====================
+说明：英文 SpeechOcean762 CAPT GNN。运行入口是 run_seeds.sh → train_speechocean2.py。
+
+------------------------------------------------------------
+一、启动与入口
+------------------------------------------------------------
+
+[run_seeds.sh]
+  一键跑主表 5 个种子（173 / 185 / 79 / 237 / 239）。
+  用法：CUDA_DEVICE=0 ./run_seeds.sh
+  输出目录：exp/seed{N}/
+
+[train_speechocean2.py]
+  英文训练主程序（最重要）。
+  负责：读 labels / SSL features / GOP / caches、组图、
+  多任务损失（MDD / detect / APA）、验证、经典 MDD 评估、存 best_mdd_f1.pt。
+  路径默认相对本目录。
+
+[README.md]
+  布局、5 个 seed、运行命令。
+
+------------------------------------------------------------
+二、模型主体（英文）
+------------------------------------------------------------
+
+[english_gnn2.py]
+  英文主模型：Phone–Word 图、Qwen→GOP→SSL FiLM、MDD/APA 头、Sync。
+
+[english_graph_edges.py]
+  英文图拓扑：音素链 + 词节点及 phone–word 边。
+
+[typed_gnn_blocks.py]
+  带边类型的 TransformerConv 图块（stem / MDD / APA 塔共用结构）。
+
+------------------------------------------------------------
+三、特征融合与跨层交互
+------------------------------------------------------------
+
+[tri_ssl_cross_enhancer.py]
+  三路 SSL（HuBERT / Wav2Vec2 / WavLM）投影与自注意力增强。
+
+[cross_layer_sync.py]
+  Cross-Layer Sync：节点 ↔ 帧跨层注意力桥接（默认层 2、4）。
+
+[apa_segment_readout.py]
+  APA 帧级 cross-attention 读出。
+
+[apa_heads.py]
+  APA 打分头。
+
+------------------------------------------------------------
+四、GOP / 词表 / MDD 评估
+------------------------------------------------------------
+
+[fa_cache_speechocean.py]
+  加载英文 FA 缓存（phone/word mask），对应 caches/fa_cache/。
+
+[hmamba_phone_vocab.py]
+  加载 resource/vocab_merge.json，音素 ID 映射（与 HMamba 词表对齐）。
+
+[classic_mdd_eval.py]
+  训练后调用经典 MDD 评测（PR/RE/F1 等）。
+
+[eval_mdd/]
+  MDD 评测脚本与工具（mdd_result.sh、utils/）。
+
+------------------------------------------------------------
+五、共享辅助（也被 train_gop_graph 引用）
+------------------------------------------------------------
+
+[train_gop_graph.py]
+  提供通用工具函数（如 acoustic stats、帧对齐），被 train_speechocean2 import。
+  不是英文主入口，但不要删。
+
+[phoneme_gnn.py]
+  提供部分共享常量/组件（如韵律维数），被英文训练引用。
+
+[phoneme_graph_edges.py]
+  中文式音素图边构造（train_gop_graph / phoneme_gnn 依赖；保留以免 import 断）。
+
+[phoneme_ctc_align.py]
+  帧–片段时长对齐辅助。
+
+[hubert_fa_cache.py]
+  HuBERT FA mask 加载（train_gop_graph 路径用）。
+
+[hubert_side_cache.py]
+  F0 / Energy 缓存加载与统计。
+
+[phonological_contrast.py]
+  Stem 监督对比损失（若开启相关权重时使用）。
+
+------------------------------------------------------------
+六、数据与特征目录（非 .py，训练依赖）
+------------------------------------------------------------
+
+[data/train|test/labels.jsonl]
+  英文标注（词/音素分数、文本等）。
+
+[data/train|test/utt_ids.txt]
+  utterance 列表，用于对齐 GOP seq energy/dur。
+
+[features/]
+  预提取 SSL：hubert / wav2vec2 / wavlm / qwen（.npy）。
+
+[gop_feature/raw_kaldi_gop/librispeech]
+  官方 Kaldi GOP 84 维。
+
+[gop_feature/seq_data_librispeech]
+  GOPT 序列 energy/dur 特征。
+
+[caches/]
+  fa_cache、hubert_f0、hubert_energy。
+
+[resource/vocab_merge.json]
+  音素词表。
+
+[exp/]
+  训练输出（跑 run_seeds.sh 后生成）。
+
+------------------------------------------------------------
+七、依赖关系（简图）
+------------------------------------------------------------
+
+  run_seeds.sh
+      └─ train_speechocean2.py
+            ├─ english_gnn2.py
+            │     ├─ english_graph_edges.py
+            │     ├─ typed_gnn_blocks.py
+            │     ├─ tri_ssl_cross_enhancer.py
+            │     ├─ cross_layer_sync.py
+            │     ├─ apa_heads.py / apa_segment_readout.py
+            │     └─ …
+            ├─ fa_cache_speechocean.py
+            ├─ hmamba_phone_vocab.py
+            ├─ classic_mdd_eval.py → eval_mdd/
+            ├─ hubert_side_cache.py
+            ├─ phoneme_gnn.py / train_gop_graph.py（共享工具）
+            └─ features / gop_feature / caches / data / resource
+
+启动命令：
+  cd EN
+  CUDA_DEVICE=0 ./run_seeds.sh

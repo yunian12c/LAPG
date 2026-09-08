@@ -1,0 +1,19 @@
+{
+  "frame_source": "hubert",
+  "hubert_dir": "/home/chenliye/Graph/hubert_feature",
+  "out_dir": "/home/chenliye/Graph/GNN/fa_cache/torchaudio_mms_hubert_native",
+  "splits": {
+    "train": {
+      "ok": 11182,
+      "fallback": 0,
+      "skip": 0,
+      "missing": 0
+    },
+    "test": {
+      "ok": 4801,
+      "fallback": 0,
+      "skip": 0,
+      "missing": 0
+    }
+  }
+}
