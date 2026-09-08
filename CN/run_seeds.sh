@@ -20,7 +20,7 @@ run_one() {
   mkdir -p "$OUT"
 
   if [[ -f "${OUT}/best_model.pt" ]] && [[ -f "$LOG" ]] && grep -qE '\[early stop\]|\[done\]|epoch 60/' "$LOG" 2>/dev/null; then
-    echo "[skip] seed=${SEED} already done â†’ ${OUT}"
+    echo "[skip] seed=${SEED} already done â†?${OUT}"
     return 0
   fi
 
@@ -28,7 +28,7 @@ run_one() {
   : >"${OUT}/train_log.jsonl"
   rm -f "${OUT}/"*.pt 2>/dev/null || true
 
-  "$PY" -u ./train_gop_graph.py \
+  "$PY" -u ./train_graph.py \
     --qwen-fusion film \
     --cuda-device "${CUDA_DEVICE}" \
     --seed "${SEED}" \
