@@ -1,0 +1,48 @@
+# LAPG dependencies — pinned to reference conda env `GNN`
+# Python 3.10.20 | Linux | CUDA 12.8 (torch 2.11.0+cu128)
+#
+# Install order:
+#   1) Python 3.10 env
+#   2) Install CUDA PyTorch wheels (do NOT rely on the plain torch== lines alone for GPU):
+#        pip install torch==2.11.0 torchaudio==2.11.0 torchvision==0.26.0 \
+#          --index-url https://download.pytorch.org/whl/cu128
+#   3) pip install -r requirements.txt
+#   4) If torch-geometric fails, follow:
+#        https://pytorch-geometric.readthedocs.io/en/latest/install/installation.html
+#
+# CPU-only:
+#   pip install torch==2.11.0 torchaudio==2.11.0 torchvision==0.26.0 \
+#     --index-url https://download.pytorch.org/whl/cpu
+
+# ===== core (required to train with precomputed features / caches) =====
+numpy==2.2.6
+torch==2.11.0
+torch-geometric==2.7.0
+
+# ===== PyTorch ecosystem (as in GNN) =====
+torchaudio==2.11.0
+torchvision==0.26.0
+
+# ===== scientific / ML (as in GNN) =====
+scipy==1.15.2
+pandas==2.3.3
+scikit-learn==1.7.2
+networkx==3.4.2
+tqdm==4.69.0
+PyYAML==6.0.3
+matplotlib==3.10.8
+Pillow==12.1.1
+joblib==1.5.3
+threadpoolctl==3.6.0
+
+# ===== audio (FA / F0 / Energy / SSL extraction; optional if caches provided) =====
+librosa==0.11.0
+soundfile==0.13.1
+audioread==3.0.1
+soxr==1.1.0
+pooch==1.9.0
+numba==0.65.1
+llvmlite==0.47.0
+lazy_loader==0.5
+decorator==5.2.1
+msgpack==1.1.2

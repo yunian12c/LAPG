@@ -1,0 +1,44 @@
+# Reference environment matching conda env `GNN` used for LAPG experiments.
+#
+#   conda env create -f environment.yml
+#   conda activate LAPG
+#
+# Then ensure CUDA PyTorch wheels match GNN (cu128):
+#   pip install torch==2.11.0 torchaudio==2.11.0 torchvision==0.26.0 \
+#     --index-url https://download.pytorch.org/whl/cu128
+#   pip install torch-geometric==2.7.0
+
+name: LAPG
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.20
+  - numpy=2.2.6
+  - scipy=1.15.2
+  - pandas=2.3.3
+  - scikit-learn=1.7.2
+  - networkx=3.4.2
+  - pyyaml=6.0.3
+  - tqdm=4.69.0
+  - matplotlib=3.10.8
+  - pillow=12.1.1
+  - joblib=1.5.3
+  - threadpoolctl=3.6.0
+  - librosa=0.11.0
+  - pysoundfile
+  - audioread=3.0.1
+  - numba=0.65.1
+  - llvmlite=0.47.0
+  - pooch=1.9.0
+  - soxr-python=1.1.0
+  - lazy-loader=0.5
+  - decorator=5.2.1
+  - pip
+  - pip:
+      - torch==2.11.0
+      - torchaudio==2.11.0
+      - torchvision==0.26.0
+      - torch-geometric==2.7.0
+      - soundfile==0.13.1
+      - msgpack==1.1.2
