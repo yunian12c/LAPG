@@ -12,6 +12,8 @@ This repository is the official code for LAPG: language-aware graph neural netwo
 
 Core idea: **language-specific pronunciation graphs** + multi-task MDD / APA (+ CN ASR), with SSL / Qwen FiLM fusion and cross-layer Sync.
 
+![LAPG main model](main.png)
+
 ---
 
 ## Repository layout
@@ -19,6 +21,7 @@ Core idea: **language-specific pronunciation graphs** + multi-task MDD / APA (+ 
 ```
 LAPG/
 ├── README.md                 # this file
+├── main.png                  # model overview figure
 ├── requirements.txt          # pip deps (from conda env GNN)
 ├── environment.yml           # conda env create
 ├── CN/                       # Chinese experiments
